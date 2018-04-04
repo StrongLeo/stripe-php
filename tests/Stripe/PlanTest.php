@@ -43,6 +43,58 @@ class PlanTest extends TestCase
         $this->assertInstanceOf("Stripe\\Plan", $resource);
     }
 
+    public function testIsCreatableMetered()
+    {
+        $this->expectsRequest(
+            'post',
+            '/v1/plans'
+        );
+        $resource = Plan::create([
+            'amount' => 100,
+            'interval' => 'month',
+            'currency' => 'usd',
+            'name' => self::TEST_RESOURCE_ID,
+            'id' => self::TEST_RESOURCE_ID,
+            'usage_type' => 'metered'
+        ]);
+        $this->assertInstanceOf("Stripe\\Plan", $resource);
+    }
+
+    public function testIsCreatableTiered()
+    {
+        $this->expectsRequest(
+            'post',
+            '/v1/plans'
+        );
+        $resource = Plan::create([
+            'interval' => 'month',
+            'currency' => 'usd',
+            'name' => self::TEST_RESOURCE_ID,
+            'id' => self::TEST_RESOURCE_ID,
+            'billing_scheme' => 'tiered',
+            'tiers' => [['up_to' => 100, 'amount' => 100], ['up_to' => 'inf', 'amount' => 200]],
+            'tiers_mode' => 'volume'
+        ]);
+        $this->assertInstanceOf("Stripe\\Plan", $resource);
+    }
+
+    public function testIsCreatableTransformUsage()
+    {
+        $this->expectsRequest(
+            'post',
+            '/v1/plans'
+        );
+        $resource = Plan::create([
+            'amount' => 100,
+            'interval' => 'month',
+            'currency' => 'usd',
+            'name' => self::TEST_RESOURCE_ID,
+            'id' => self::TEST_RESOURCE_ID,
+            'transform_usage' => ['round' => 'up', 'divide_by' => 10]
+        ]);
+        $this->assertInstanceOf("Stripe\\Plan", $resource);
+    }
+
     public function testIsSaveable()
     {
         $resource = Plan::retrieve(self::TEST_RESOURCE_ID);
